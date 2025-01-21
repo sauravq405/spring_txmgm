@@ -45,3 +45,10 @@ Request:
 }
 ```
 H2 Console: http://localhost:8090/passenger/h2-console/
+
+TABLE QUERIES:
+```
+select * from PASSENGER_INFO;
+
+select * from PAYMENT_INFO;
+```
