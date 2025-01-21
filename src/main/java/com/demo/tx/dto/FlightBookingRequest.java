@@ -2,9 +2,7 @@ package com.demo.tx.dto;
 
 import com.demo.tx.entity.PassengerInfo;
 import com.demo.tx.entity.PaymentInfo;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 public class FlightBookingRequest {
       private PassengerInfo passengerInfo;
       private PaymentInfo paymentInfo;

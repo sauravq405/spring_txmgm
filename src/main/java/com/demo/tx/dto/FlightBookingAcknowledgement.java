@@ -1,9 +1,7 @@
 package com.demo.tx.dto;
 
 import com.demo.tx.entity.PassengerInfo;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 public class FlightBookingAcknowledgement {
     private String status;
     private Double totalFare;
