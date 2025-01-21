@@ -19,6 +19,19 @@ git branch -M main
 git push -u origin main
 ```
 
+##**Custom error response:**
+```
+{
+    "errorResponse": {
+        "statusCode": 400,
+        "errorMessage": "Insufficient funds in account balance",
+        "path": "/passenger/api/bookFlightTicket",
+        "timestamp": "2025-01-21T22:55:29.913457"
+    }
+}
+```
+
+
 ## **Mandatory Info:**
 {Valid API URL and request body to create an employee.}
 
