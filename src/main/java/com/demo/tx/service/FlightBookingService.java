@@ -24,8 +24,8 @@ public class FlightBookingService {
 
     private static final Double GST = 125.67;
 
-    @Transactional(readOnly = false, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
-    //@Transactional
+    //@Transactional(readOnly = false, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    @Transactional
     public FlightBookingAcknowledgement bookFlightTicket(FlightBookingRequest request){
         PassengerInfo passengerInfo = request.getPassengerInfo();
         PaymentInfo paymentInfo = request.getPaymentInfo();
