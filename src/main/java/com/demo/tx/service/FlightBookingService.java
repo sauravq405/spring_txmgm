@@ -1,5 +1,6 @@
 package com.demo.tx.service;
 
+import com.demo.tx.constants.AppConstants;
 import com.demo.tx.dto.FlightBookingAcknowledgement;
 import com.demo.tx.dto.FlightBookingRequest;
 import com.demo.tx.entity.PassengerInfo;
@@ -22,11 +23,9 @@ public class FlightBookingService {
     @Autowired
     private PaymentInfoRepository paymentInfoRepository;
 
-    private static final Double GST = 125.67;
-
     @Transactional(readOnly = false, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public FlightBookingAcknowledgement bookFlightTicket(FlightBookingRequest request){
-        testExceptions();
+        //testExceptions();
         PassengerInfo passengerInfo = request.getPassengerInfo();
         PaymentInfo paymentInfo = request.getPaymentInfo();
 
@@ -41,7 +40,7 @@ public class FlightBookingService {
             paymentInfoRepository.save(paymentInfo);
         }
         return new FlightBookingAcknowledgement("SUCCESS",
-                savedPassengerInfo.getFare() + GST,
+                savedPassengerInfo.getFare() + AppConstants.GST,
                 UUID.randomUUID().toString().split("-")[0],
                 savedPassengerInfo);
     }

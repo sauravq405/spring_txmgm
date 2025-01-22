@@ -147,6 +147,8 @@ TABLE QUERIES:
 select * from PASSENGER_INFO;
 
 select * from PAYMENT_INFO;
+
+select * from AUDIT_LOGS;
 ```
 Command to random UUID String from MAC/Linux terminal 
 ```
