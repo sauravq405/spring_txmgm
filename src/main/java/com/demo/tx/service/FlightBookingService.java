@@ -26,6 +26,7 @@ public class FlightBookingService {
 
     @Transactional(readOnly = false, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public FlightBookingAcknowledgement bookFlightTicket(FlightBookingRequest request){
+        testExceptions();
         PassengerInfo passengerInfo = request.getPassengerInfo();
         PaymentInfo paymentInfo = request.getPaymentInfo();
 
@@ -43,6 +44,12 @@ public class FlightBookingService {
                 savedPassengerInfo.getFare() + GST,
                 UUID.randomUUID().toString().split("-")[0],
                 savedPassengerInfo);
+    }
+
+    private void testExceptions() {
+        //int i = 100/0;
+        String s = null;
+        s.getBytes();
     }
 
 }
