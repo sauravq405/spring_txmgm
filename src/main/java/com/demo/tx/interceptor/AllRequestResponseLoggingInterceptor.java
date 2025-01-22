@@ -11,6 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -23,34 +24,49 @@ public class AllRequestResponseLoggingInterceptor implements HandlerInterceptor 
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        System.out.println("Incoming Request:");
-        System.out.println("URL: " + request.getRequestURL());
-        System.out.println("Method: " + request.getMethod());
-        System.out.println("Headers: " + request.getHeaderNames());
+        try {
+            // Wrap the request to capture its body
+            CachedBodyHttpServletRequest wrappedRequest = new CachedBodyHttpServletRequest(request);
 
-        // Fetch and print all headers
-        System.out.println("Headers:");
-        request.getHeaderNames().asIterator()
-                .forEachRemaining(headerName ->
-                        System.out.println(headerName + ": " + request.getHeader(headerName))
-                );
-        return true; // Continue processing
+            // Log request details
+            System.out.println("Incoming Request Details:");
+            System.out.println("URL: " + wrappedRequest.getRequestURL());
+            System.out.println("Method: " + wrappedRequest.getMethod());
+            System.out.println("Headers: ");
+            wrappedRequest.getHeaderNames().asIterator()
+                    .forEachRemaining(headerName ->
+                            System.out.println(headerName + ": " + wrappedRequest.getHeader(headerName))
+                    );
+
+            // Log the request body
+            String body = wrappedRequest.getCachedBody();
+            System.out.println("Request Body: " + body);
+
+            // Re-use the wrapped request for the actual processing
+            request = wrappedRequest;
+
+        } catch (IOException e) {
+            // Handle the exception gracefully
+            System.err.println("Error reading request body: " + e.getMessage());
+            // If error, prevent further processing
+            throw new RuntimeException(e);
+        }
+
+        return true; // Continue processing the request
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws URISyntaxException {
-        System.out.println("Outgoing Response:");
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws URISyntaxException, IOException {
+        // Log outgoing response details
+        System.out.println("Outgoing Response Details:");
         String path = new URI(request.getRequestURL().toString()).getPath();
         int httpStatusCode = response.getStatus();
         System.out.println("Status: " + httpStatusCode);
-        String status = null;
-        if (httpStatusCode >= 200 && httpStatusCode < 300) {
-            status = AppConstants.SUCCESS;
-            System.out.println("Request to " + path + " PASSED with status " + httpStatusCode);
-        } else {
-            status = AppConstants.FAILED;
-            System.out.println("Request to " + path + " FAILED with status " + httpStatusCode);
-        }
+
+        String status = httpStatusCode >= 200 && httpStatusCode < 300 ? AppConstants.SUCCESS : AppConstants.FAILED;
+        System.out.println("Request to " + path + (status.equals(AppConstants.SUCCESS) ? " PASSED" : " FAILED") + " with status " + httpStatusCode);
+
+        // Create and save audit log
         AuditLogs auditLogs = new AuditLogs(request.getHeader("rc"),
                 path,
                 httpStatusCode,
@@ -58,5 +74,11 @@ public class AllRequestResponseLoggingInterceptor implements HandlerInterceptor 
                 DateFormatter.formatDateAsString(new Date(), AppConstants.DATE_TIME_FORMAT_01),
                 new Date());
         auditLogsRepository.save(auditLogs);
+
+        // Wrap the response to capture its body
+        CachedBodyHttpServletResponse wrappedResponse = (CachedBodyHttpServletResponse) response;
+
+        // Log the response body
+        System.out.println("Response Body: " + wrappedResponse.getCachedBody());
     }
 }
