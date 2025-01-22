@@ -26,7 +26,7 @@ public class FlightBookingService {
 
     @Transactional(readOnly = false, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public FlightBookingAcknowledgement bookFlightTicket(FlightBookingRequest request){
-        //testExceptions();
+        testExceptions();
         PassengerInfo passengerInfo = request.getPassengerInfo();
         PaymentInfo paymentInfo = request.getPaymentInfo();
 

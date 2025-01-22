@@ -148,3 +148,8 @@ select * from PASSENGER_INFO;
 
 select * from PAYMENT_INFO;
 ```
+Command to random UUID String from MAC/Linux terminal 
+```
+uuidgen | tr 'a-f' 'A-F' | tr -d '-'
+
+```
