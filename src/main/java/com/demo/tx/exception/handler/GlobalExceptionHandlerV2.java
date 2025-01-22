@@ -3,6 +3,8 @@ package com.demo.tx.exception.handler;
 import com.demo.tx.exception.InsufficientFundsException;
 import com.demo.tx.model.ApiErrorResponseV2;
 import com.demo.tx.model.ApiErrorWrapperV2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,6 +18,9 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandlerV2 {
+
+    @Autowired
+    private Environment environment;
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorWrapperV2> handleAllExceptions(Exception ex, WebRequest request) {
@@ -34,23 +39,26 @@ public class GlobalExceptionHandlerV2 {
 
     private ResponseEntity<ApiErrorWrapperV2> buildErrorResponse(Throwable ex, WebRequest request, HttpStatus status) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
-        Throwable rootCause = getRootCause(ex);
-        StackTraceElement element = rootCause.getStackTrace()[0];
-
+        // Check active profile
+        String activeProfile = environment.getProperty("spring.profiles.active");
         ApiErrorResponseV2 errorResponse = new ApiErrorResponseV2(
                 status.value(),
-                rootCause.getMessage(),
+                ex.getMessage(),
                 request.getDescription(false).replace("uri=", ""),
-                timestamp,
-                element.getClassName(),
-                element.getMethodName(),
-                element.getClassName().substring(0, element.getClassName().lastIndexOf('.')),
-                element.getLineNumber(),
-                Arrays.stream(rootCause.getStackTrace())
-                        .map(StackTraceElement::toString)
-                        .collect(Collectors.toList())
+                timestamp
         );
-
+        if (activeProfile != null && (activeProfile.equals("dev") || activeProfile.equals("uat"))) {
+            // Initialize additional fields for dev or test environment
+            Throwable rootCause = getRootCause(ex);
+            StackTraceElement element = rootCause.getStackTrace()[0];
+            errorResponse.setClassName(element.getClassName());
+            errorResponse.setMethodName(element.getMethodName());
+            errorResponse.setPackageName(element.getClassName().substring(0, element.getClassName().lastIndexOf('.')));
+            errorResponse.setLineNumber(element.getLineNumber());
+            errorResponse.setStackTrace(Arrays.stream(ex.getStackTrace())
+                    .map(StackTraceElement::toString)
+                    .collect(Collectors.toList()));
+        }
         ApiErrorWrapperV2 wrappedResponse = new ApiErrorWrapperV2(errorResponse);
         return new ResponseEntity<>(wrappedResponse, status);
     }

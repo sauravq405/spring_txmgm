@@ -1,7 +1,10 @@
 package com.demo.tx.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiErrorResponseV2 {
     private int statusCode;
     private String errorMessage;
@@ -10,13 +13,20 @@ public class ApiErrorResponseV2 {
     private String className;
     private String methodName;
     private String packageName;
-    private int lineNumber;
+    private Integer lineNumber;
     private List<String> stackTrace;
     public ApiErrorResponseV2(){
 
     }
 
-    public ApiErrorResponseV2(int statusCode, String errorMessage, String path, String timestamp, String className, String methodName, String packageName, int lineNumber, List<String> stackTrace) {
+    public ApiErrorResponseV2(int statusCode, String errorMessage, String path, String timestamp) {
+        this.statusCode = statusCode;
+        this.errorMessage = errorMessage;
+        this.path = path;
+        this.timestamp = timestamp;
+    }
+
+    public ApiErrorResponseV2(int statusCode, String errorMessage, String path, String timestamp, String className, String methodName, String packageName, Integer lineNumber, List<String> stackTrace) {
         this.statusCode = statusCode;
         this.errorMessage = errorMessage;
         this.path = path;
@@ -85,11 +95,11 @@ public class ApiErrorResponseV2 {
         this.packageName = packageName;
     }
 
-    public int getLineNumber() {
+    public Integer getLineNumber() {
         return lineNumber;
     }
 
-    public void setLineNumber(int lineNumber) {
+    public void setLineNumber(Integer lineNumber) {
         this.lineNumber = lineNumber;
     }
 

@@ -150,8 +150,13 @@ select * from PAYMENT_INFO;
 
 select * from AUDIT_LOGS;
 ```
-Command to random UUID String from MAC/Linux terminal 
+Command to random UUID String from MAC/Linux terminal, for sending mandatory unique header "RC" along with all requests
 ```
 uuidgen | tr 'a-f' 'A-F' | tr -d '-'
+
+```
+RC Header example
+```
+RC = 3AD96DD5E1414E8BAD1D69B9D0337989
 
 ```

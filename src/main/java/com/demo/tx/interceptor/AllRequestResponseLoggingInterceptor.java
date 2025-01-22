@@ -34,7 +34,6 @@ public class AllRequestResponseLoggingInterceptor implements HandlerInterceptor 
                 .forEachRemaining(headerName ->
                         System.out.println(headerName + ": " + request.getHeader(headerName))
                 );
-
         return true; // Continue processing
     }
 
