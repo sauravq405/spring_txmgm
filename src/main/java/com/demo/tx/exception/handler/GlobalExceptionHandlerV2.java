@@ -6,6 +6,8 @@ import com.demo.tx.model.ApiErrorWrapperV2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
+import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -24,6 +27,8 @@ public class GlobalExceptionHandlerV2 {
 
     @Autowired
     private Environment environment;
+
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorWrapperV2> handleAllExceptions(Exception ex, WebRequest request) {
@@ -64,7 +69,7 @@ public class GlobalExceptionHandlerV2 {
         //Still if you want to double-check and apply validation before logging error details.
         int httpStatusCode = status.value();
         if (httpStatusCode >= 200 && httpStatusCode < 300) {
-            System.out.println("Ignoring to log sensitive fields");
+            log.debug("Ignoring to log sensitive fields");
         } else {
             // Print the entire object to the logs
             logErrorDetails(errorResponse);
@@ -108,10 +113,10 @@ public class GlobalExceptionHandlerV2 {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // Pretty print JSON
-            System.out.println("Error Details (Full):");
-            System.out.println(objectMapper.writeValueAsString(errorResponse));
+            log.error("Error Details (Full):");
+            log.error(objectMapper.writeValueAsString(errorResponse));
         } catch (JsonProcessingException e) {
-            System.err.println("Error logging details as JSON: " + e.getMessage());
+            log.error("Error logging details as JSON: {}", e.getMessage(), e);
         }
     }
 

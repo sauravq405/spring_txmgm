@@ -160,3 +160,25 @@ RC Header example
 RC = 3AD96DD5E1414E8BAD1D69B9D0337989
 
 ```
+Command to search a particular text string at root level of project
+```
+grep -rnw . -e "sampletext"
+
+```
+
+Logging levels in logback (spring-boot) in the order of their severity 
+```
+TRACE < DEBUG < INFO < WARN < ERROR < OFF
+
+```
+
+In Logback, which is commonly used with Spring Boot for logging, the error levels are defined in the following order of ascending severity:
+
+TRACE - The lowest level, used for very detailed logging, often used for debugging purposes.
+DEBUG - Used for debugging information, more detailed than INFO but less than TRACE.
+INFO - General operational information to keep track of the application's state.
+WARN - Indicates potential problems or issues that might not prevent the application from running but could lead to errors if not addressed.
+ERROR - Indicates errors in the application which might prevent some features from working correctly but does not halt the application.
+OFF - Not technically a logging level, but used to turn off logging entirely.
+
+Remember, when configuring log levels, setting a level means you'll see logs at that level and all levels above it (higher in severity). For example, setting the log level to INFO means you'll see INFO, WARN, and ERROR logs but not DEBUG or TRACE.
