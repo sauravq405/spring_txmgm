@@ -4,6 +4,12 @@ import com.demo.tx.constants.AppConstants;
 import com.demo.tx.entity.AuditLogs;
 import com.demo.tx.repository.AuditLogsRepository;
 import com.demo.tx.utils.DateFormatter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -83,7 +90,37 @@ public class AllRequestResponseLoggingInterceptor implements HandlerInterceptor 
         // Wrap the response to capture its body
         CachedBodyHttpServletResponse wrappedResponse = (CachedBodyHttpServletResponse) response;
 
+        String prettyJson = prettifyJson_LightWay(wrappedResponse.getCachedBody());
+
         // Log the response body
-        log.debug("Response Body: {}", wrappedResponse.getCachedBody());
+        log.debug("Response Body: {}", prettyJson);
+    }
+
+    private static String prettifyJson_ExpensiveWay(String jsonString) throws JsonProcessingException {
+        // Create an ObjectMapper instance
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Parse the JSON string into a JsonNode
+        JsonNode jsonNode = mapper.readTree(jsonString);
+
+        // Pretty print the JSON
+        String prettyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+        return prettyJson;
+    }
+
+    private static String prettifyJson_LightWay(String jsonString) throws IOException {
+
+        JsonFactory factory = new JsonFactory();
+        StringWriter sw = new StringWriter();
+
+        try (JsonParser parser = factory.createParser(jsonString);
+             JsonGenerator generator = factory.createGenerator(sw).useDefaultPrettyPrinter()) {
+            while (parser.nextToken() != null) {
+                generator.copyCurrentEvent(parser);
+            }
+        }
+
+        return sw.toString();
+
     }
 }
