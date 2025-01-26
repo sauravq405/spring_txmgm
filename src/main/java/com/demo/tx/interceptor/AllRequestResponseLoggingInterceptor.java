@@ -4,6 +4,9 @@ import com.demo.tx.constants.AppConstants;
 import com.demo.tx.entity.AuditLogs;
 import com.demo.tx.repository.AuditLogsRepository;
 import com.demo.tx.utils.DateFormatter;
+import com.demo.tx.utils.JsonPrettyPrinter;
+import com.demo.tx.utils.JsonPrettyPrinterFailedTrial;
+import com.demo.tx.utils.LoggingOutputStream;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -90,10 +93,11 @@ public class AllRequestResponseLoggingInterceptor implements HandlerInterceptor 
         // Wrap the response to capture its body
         CachedBodyHttpServletResponse wrappedResponse = (CachedBodyHttpServletResponse) response;
 
-        String prettyJson = prettifyJson_LightWay(wrappedResponse.getCachedBody());
+        String prettyJson = JsonPrettyPrinter.prettifyJsonForLogging(prettifyJson_LightWay(wrappedResponse.getCachedBody()));
 
         // Log the response body
-        log.debug("Response Body: {}", prettyJson);
+        log.debug("Response Body: {} \n", prettyJson);
+
     }
 
     private static String prettifyJson_ExpensiveWay(String jsonString) throws JsonProcessingException {
@@ -108,19 +112,28 @@ public class AllRequestResponseLoggingInterceptor implements HandlerInterceptor 
         return prettyJson;
     }
 
-    private static String prettifyJson_LightWay(String jsonString) throws IOException {
-
+    private void  prettifyJson_LightWayV2(String jsonString) throws IOException {
         JsonFactory factory = new JsonFactory();
-        StringWriter sw = new StringWriter();
+        LoggingOutputStream logStream = new LoggingOutputStream(log);
 
         try (JsonParser parser = factory.createParser(jsonString);
-             JsonGenerator generator = factory.createGenerator(sw).useDefaultPrettyPrinter()) {
+             JsonGenerator generator = factory.createGenerator(logStream).useDefaultPrettyPrinter()) {
             while (parser.nextToken() != null) {
                 generator.copyCurrentEvent(parser);
             }
         }
+    }
 
+    private String  prettifyJson_LightWay(String jsonString) throws IOException {
+        JsonFactory factory = new JsonFactory();
+        StringWriter sw = new StringWriter();
+
+        try (JsonParser parser = factory.createParser(jsonString);
+            JsonGenerator generator = factory.createGenerator(sw).useDefaultPrettyPrinter()) {
+            while (parser.nextToken() != null) {
+                generator.copyCurrentEvent(parser);
+            }
+        }
         return sw.toString();
-
     }
 }
