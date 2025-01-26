@@ -11,11 +11,34 @@
         </encoder>
     </appender>
 
-    <appender name="myFileAppender" class="ch.qos.logback.core.FileAppender">
-        <encoder>
-            <pattern>%d{dd MMM yyyy HH:mm:ss.SSS z} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
+    <!--<appender name="myFileAppender" class="ch.qos.logback.core.FileAppender">
+     File Appender doesn't provide Log File Rotation;
+     like it can't create new files after a particular threshold of size or time is reached.
+     Hence, RollingFileAppender is used.-->
+    <appender name="myFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- Path to the ACTIVE log file (currently being written to) -->
         <file>tlogs/spring_txmgm.log</file>
+
+        <!-- Configure Size+Time-based rolling policy -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Archived log file pattern:
+                 - Rolls when either 1MB size is reached OR a new day begins (yyyy-MM-dd)
+                 - %i = incremental counter for same-day size-based rolls -->
+            <fileNamePattern>tlogs/spring_txmgm-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+
+            <!-- Maximum size of ACTIVE file before rotation (1MB) -->
+            <maxFileSize>1MB</maxFileSize>
+
+            <!-- Maximum number of archived logs to retain - after creating 10 files the oldest file wil be deleted -->
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+
+        <!-- Log entry format -->
+        <encoder>
+            <pattern>
+                %d{dd MMM yyyy HH:mm:ss.SSS z} [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
     </appender>
 
     <!--<root level="DEBUG">
